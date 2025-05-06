@@ -1,58 +1,45 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor, export_graphviz
+import graphviz
 from sklearn.metrics import mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-# Título de la aplicación
-st.title("Predicción de Tiempo de Recuperación de Jugadores")
+# Cargar datos desde el archivo CSV
+data = pd.read_csv('injury_data.csv')
 
-# Subir el archivo CSV
-uploaded_file = st.file_uploader("Sube tu archivo CSV", type="csv")
-if uploaded_file is not None:
-    # Cargar datos
-    data = pd.read_csv(uploaded_file)
+# Separar variables independientes (X) y la variable dependiente (y)
+X = data[['Player_Age', 'Player_Weight', 'Player_Height', 'Previous_Injuries', 'Training_Intensity']]
+y = data['Recovery_Time']
 
-    # Mostrar las primeras filas de los datos
-    st.write(data.head())
+# Dividir datos en entrenamiento y prueba (80% entrenamiento, 20% prueba)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Separar variables independientes (X) y dependientes (y)
-    X = data[['Player_Age', 'Player_Weight', 'Player_Height', 'Previous_Injuries', 'Training_Intensity']]
-    y = data['Recovery_Time']
+# Crear y entrenar el modelo con una profundidad máxima para evitar sobreajuste
+model = DecisionTreeRegressor(max_depth=4, min_samples_leaf=5, random_state=42)
+model.fit(X_train, y_train)
 
-    # Dividir datos en entrenamiento y prueba
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Hacer predicciones
+y_pred = model.predict(X_test)
 
-    # Crear y entrenar el modelo
-    model = DecisionTreeRegressor(max_depth=4, min_samples_leaf=5, random_state=42)
-    model.fit(X_train, y_train)
+# Calcular métricas de evaluación
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
 
-    # Hacer predicciones
-    y_pred = model.predict(X_test)
+# Mostrar las métricas
+st.write(f"Error absoluto medio (MAE): {mae:.2f} días")
+st.write(f"Coeficiente de determinación (R²): {r2:.2f}")
 
-    # Evaluar el modelo
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
+# Comparación entre valores reales y predichos
+predictions = pd.DataFrame({'Real': y_test.values, 'Predicho': y_pred})
+st.write(predictions)
 
-    # Mostrar las métricas
-    st.write(f"Error absoluto medio (MAE): {mae:.2f} días")
-    st.write(f"Coeficiente de determinación (R²): {r2:.2f}")
+# Exportar el árbol de decisión como un archivo .dot
+dot_data = export_graphviz(model, out_file=None, feature_names=X.columns, filled=True, rounded=True, special_characters=True)
 
-    # Mostrar la comparación de predicciones
-    predictions = pd.DataFrame({'Real': y_test.values, 'Predicho': y_pred})
-    st.write("Comparación entre valores reales y predichos", predictions)
+# Crear el gráfico de Graphviz
+graph = graphviz.Source(dot_data)
 
-    # Visualizar la importancia de las características
-    st.subheader('Importancia de las Características')
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x=model.feature_importances_, y=X.columns)
-    st.pyplot()
-
-    # Visualizar el árbol de decisión
-    st.subheader('Árbol de Decisión')
-    plt.figure(figsize=(20, 10))
-    tree.plot_tree(model, filled=True, feature_names=X.columns)
-    st.pyplot()
-
+# Mostrar el árbol de decisión en Streamlit
+st.graphviz_chart(graph)
