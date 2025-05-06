@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
 # Cargar el CSV por defecto al iniciar la app
-@st.cache
+@st.cache_data
 def cargar_datos():
     try:
         return pd.read_csv('injury_data.csv')
