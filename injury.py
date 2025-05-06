@@ -61,9 +61,7 @@ if not data.empty:
         predicted_recovery_time = model.predict(input_data)
 
         st.success(f"🕒 El modelo predice que el tiempo de recuperación es: **{predicted_recovery_time[0]:.2f} días**.")
-        # Mostrar animación desde URL
-        st.image("https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif", caption="¡Recupérate pronto!", use_container_width=True)
-
+        
         # Guardar nuevos datos con la predicción
         new_data = input_data.copy()
         new_data['Predicted_Recovery_Time'] = predicted_recovery_time
