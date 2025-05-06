@@ -6,12 +6,11 @@ from sklearn.tree import DecisionTreeRegressor
 # Cargar el CSV por defecto al iniciar la app
 @st.cache
 def cargar_datos():
-    # Cargar datos desde el archivo CSV (por defecto en el mismo directorio)
     try:
         return pd.read_csv('injury_data.csv')
     except FileNotFoundError:
         st.warning("El archivo 'injury_data.csv' no se encontró. Asegúrate de que el archivo esté en el directorio.")
-        return pd.DataFrame()  # Retorna un DataFrame vacío si no se encuentra el archivo
+        return pd.DataFrame()
 
 # Cargar los datos al inicio
 data = cargar_datos()
@@ -28,31 +27,42 @@ if not data.empty:
     model = DecisionTreeRegressor(max_depth=4, min_samples_leaf=5, random_state=42)
     model.fit(X_train, y_train)
 
-    # Subir nuevos datos para predicción
-    st.header("Sube nuevos datos para hacer predicción")
-    uploaded_file = st.file_uploader("Cargar un archivo CSV con nuevos datos", type=["csv"])
+    # Título de la aplicación
+    st.title("Predicción de Tiempo de Recuperación de Lesiones")
 
-    if uploaded_file is not None:
-        # Leer el nuevo archivo CSV
-        new_data = pd.read_csv(uploaded_file)
+    # Ingresar datos por parte del usuario
+    st.header("Introduce los datos para hacer la predicción:")
 
-        # Asegúrate de que el archivo cargado tenga las mismas columnas que el dataset original
-        required_columns = ['Player_Age', 'Player_Weight', 'Player_Height', 'Previous_Injuries', 'Training_Intensity']
-        if all(col in new_data.columns for col in required_columns):
-            # Realizar predicciones sobre los nuevos datos
-            new_data['Predicted_Recovery_Time'] = model.predict(new_data[required_columns])
+    # Crear los campos de entrada para cada dato
+    player_age = st.number_input("Edad del jugador (Player_Age)", min_value=18, max_value=100, step=1)
+    player_weight = st.number_input("Peso del jugador (Player_Weight en kg)", min_value=30.0, max_value=200.0, step=0.1)
+    player_height = st.number_input("Altura del jugador (Player_Height en cm)", min_value=100, max_value=250, step=1)
+    previous_injuries = st.number_input("Número de lesiones anteriores (Previous_Injuries)", min_value=0, max_value=20, step=1)
+    training_intensity = st.number_input("Intensidad de entrenamiento (Training_Intensity de 0 a 10)", min_value=0, max_value=10, step=1)
 
-            # Mostrar las predicciones
-            st.write("Predicciones sobre los nuevos datos:")
-            st.write(new_data[['Player_Age', 'Player_Weight', 'Player_Height', 'Previous_Injuries', 'Training_Intensity', 'Predicted_Recovery_Time']])
+    # Botón para hacer la predicción
+    if st.button("Predecir Tiempo de Recuperación"):
+        # Crear un DataFrame con los valores ingresados
+        input_data = pd.DataFrame({
+            'Player_Age': [player_age],
+            'Player_Weight': [player_weight],
+            'Player_Height': [player_height],
+            'Previous_Injuries': [previous_injuries],
+            'Training_Intensity': [training_intensity]
+        })
 
-            # Guardar los nuevos datos y sus predicciones en el archivo CSV original
-            data = pd.concat([data, new_data], ignore_index=True)
-            data.to_csv('injury_data.csv', index=False)
-            st.success("Nuevos datos guardados en 'injury_data.csv'.")
-        else:
-            st.error(f"El archivo debe contener las siguientes columnas: {', '.join(required_columns)}.")
-    else:
-        st.info("Sube un archivo CSV con nuevos datos para hacer la predicción.")
+        # Realizar la predicción con el modelo entrenado
+        predicted_recovery_time = model.predict(input_data)
+
+        # Mostrar el resultado
+        st.write(f"El modelo predice que el tiempo de recuperación es: {predicted_recovery_time[0]:.2f} días.")
+
+        # Guardar los nuevos datos de entrada en el CSV para futuras predicciones
+        new_data = input_data.copy()
+        new_data['Predicted_Recovery_Time'] = predicted_recovery_time
+
+        data = pd.concat([data, new_data], ignore_index=True)
+        data.to_csv('injury_data.csv', index=False)
+        st.success("Los nuevos datos han sido guardados en 'injury_data.csv'.")
 else:
     st.warning("No se encontraron datos previos. Asegúrate de que 'injury_data.csv' esté presente.")
