@@ -68,9 +68,9 @@ if not data.empty:
     #st.markdown("<h3>Introduce los datos para hacer la predicción:</h3>", unsafe_allow_html=True)
     player_age = st.number_input("Edad del jugador (Player_Age)", min_value=18, max_value=100, step=1)
     player_weight = st.number_input("Peso del jugador (Player_Weight en kg)", min_value=30.0, max_value=200.0, step=0.1)
-    player_height = st.number_input("Altura del jugador (Player_Height en cm)", min_value=100, max_value=250, step=0.1)
+    player_height = st.number_input("Altura del jugador (Player_Height en cm)", min_value=100, max_value=250, step=1)
     previous_injuries = st.number_input("Número de lesiones anteriores (Previous_Injuries)", min_value=0, max_value=1, step=1)
-    training_intensity = st.number_input("Intensidad de entrenamiento (Training_Intensity de 0 a 10)", min_value=0, max_value=10, step=0.1)
+    training_intensity = st.number_input("Intensidad de entrenamiento (Training_Intensity de 0 a 10)", min_value=0, max_value=10, step=1)
 
     # Botón para predecir
     if st.button("Predecir Tiempo de Recuperación"):
@@ -84,7 +84,7 @@ if not data.empty:
 
         predicted_recovery_time = model.predict(input_data)
 
-        st.success(f"🕒 El modelo predice que el tiempo de recuperación es: **{predicted_recovery_time[0]:.4f} días**.")
+        st.success(f"🕒 El modelo predice que el tiempo de recuperación es: **{predicted_recovery_time[0]:.5f} días**.")
         
         # Guardar nuevos datos con la predicción
         new_data = input_data.copy()
