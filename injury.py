@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeRegressor
 st.markdown("""
     <style>
         html, body, [class*="css"]  {
-            font-size: 30px;
+            font-size: 25px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -39,13 +39,37 @@ if not data.empty:
     # Título grande con estilo
     st.markdown("<h1 style='font-size: 36px;'>🩺 Predicción de Tiempo de Recuperación de Lesiones</h1>", unsafe_allow_html=True)
 
+    st.markdown("""
+        ## Aplicación de Predicción de Tiempo de Recuperación de Lesiones 🏥
+
+        Esta aplicación utiliza un modelo de **árbol de decisión** entrenado con datos históricos de jugadores
+        para predecir el tiempo estimado de recuperación tras una lesión. Se consideran variables como:
+
+        - Edad del jugador
+        - Peso
+        - Altura
+        - Historial de lesiones
+        - Intensidad de entrenamiento
+
+        El modelo ha sido evaluado con la métrica **R²**, obteniendo una confiabilidad aproximada del **90%** en sus predicciones.
+
+        Herramientas utilizadas:
+        - Python 🐍
+        - Streamlit
+        - Scikit-learn
+        - Pandas
+        - GitHub para el control de versiones
+
+        ---
+        """)
+
     # Formulario de entrada de datos
     st.header("Introduce los datos para hacer la predicción:")
 
     player_age = st.number_input("Edad del jugador (Player_Age)", min_value=18, max_value=100, step=1)
     player_weight = st.number_input("Peso del jugador (Player_Weight en kg)", min_value=30.0, max_value=200.0, step=0.1)
     player_height = st.number_input("Altura del jugador (Player_Height en cm)", min_value=100, max_value=250, step=1)
-    previous_injuries = st.number_input("Número de lesiones anteriores (Previous_Injuries)", min_value=0, max_value=20, step=1)
+    previous_injuries = st.number_input("Número de lesiones anteriores (Previous_Injuries)", min_value=0, max_value=1, step=1)
     training_intensity = st.number_input("Intensidad de entrenamiento (Training_Intensity de 0 a 10)", min_value=0, max_value=10, step=1)
 
     # Botón para predecir
